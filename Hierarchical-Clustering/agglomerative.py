@@ -12,13 +12,7 @@ dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cli
 
 dataset = dataset.dropna()
 
-features_ = dataset.drop(columns=['Group'])
-
-features = pd.DataFrame(features_)
-
-print(features.info())
-
-scaler = StandardScaler()
+scaler = MinMaxScaler()
 features_scaled = scaler.fit_transform(dataset)
 
 pca = PCA(n_components=2)
@@ -28,12 +22,12 @@ Z = linkage(features, 'ward')
 
 plot.figure(figsize=(10,7))
 dendrogram(Z)
-plot.title('Dendogramma')
-plot.xlabel('Samples')
+plot.title('Dendrogramma')
+plot.xlabel('Cluster')
 plot.ylabel('Distance')
 plot.show()
 
-agglomerative = AgglomerativeClustering(n_clusters=2)
+agglomerative = AgglomerativeClustering(n_clusters=4)
 agglomerative.fit(features)
 
 labels= agglomerative.labels_
@@ -42,7 +36,9 @@ dataset['Cluster'] = labels
 
 plot.figure(figsize=(12,8))
 plot.scatter(features[:,0], features[:,1], c=labels, cmap='viridis')
-plot.title("Agglomerative Clustering (MinMaxScaler)")
+plot.title("Agglomerative Clustering (k=4)")
+plot.xlabel("Component 1 PCA")
+plot.ylabel("Component 2 PCA")
 plot.grid(True)
 plot.show()
 
@@ -61,5 +57,5 @@ plot.figure(figsize=(12,8))
 sns.heatmap(heatMap.T, annot=True, cmap='viridis')
 plot.xlabel("Cluster")
 plot.ylabel("Features")
-plot.title("HeatMap (MinMaxScaler)")
+plot.title("HeatMap")
 plot.show()

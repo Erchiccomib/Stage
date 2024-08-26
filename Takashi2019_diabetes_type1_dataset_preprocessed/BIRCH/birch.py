@@ -7,7 +7,7 @@ import matplotlib.pyplot as plot
 import seaborn as sns
 
 #Leggo il dataset
-dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0148699_S1_Text_Sepsis_SIRS_EDITED.csv')
+dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\Takashi2019_diabetes_type1_dataset_preprocessed.csv')
 
 #Elimino le righe in cui mancano valori
 dataset = dataset.dropna()
@@ -24,7 +24,7 @@ pca = PCA(n_components=2)
 features = pca.fit_transform(features_scaled)
 
 #Eseguo Birch
-birch = Birch(threshold=0.3, n_clusters=100) #Ho provato diversi valori per branching_factor ma non cambia nulla, mentre per threshold ho notato che impostandolo a 0.3 si ha un miglior clustering
+birch = Birch(threshold=0.52, n_clusters=None) #Ho provato diversi valori per branching_factor ma non cambia nulla, mentre per threshold ho notato che impostandolo a 0.3 si ha un miglior clustering
 birch.fit(features)
 
 labels = birch.labels_

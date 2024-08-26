@@ -8,7 +8,7 @@ from sklearn.decomposition import PCA
 import seaborn as sns
 
 ##Leggo il dataset dal file csv
-dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0148699_S1_Text_Sepsis_SIRS_EDITED.csv')
+dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\Takashi2019_diabetes_type1_dataset_preprocessed.csv')
 dataset = dataset.dropna()
 
 print(dataset.info()) ## Da qui noto tutte le informazioni dei dati, sopratutto il tipo di dato presente così da capire se pre-elaborare i dati
@@ -46,8 +46,8 @@ plt.title('Gomito')
 plt.grid(True)
 plt.show()
 
-#Da qui ho notato che tramite k=4 si hanno i risultati migliori, dunque ho eseguito k-means con k=4 così da mostrare il cluster ottenuto
-kmenas = KMeans(n_clusters =4, random_state=42)
+#Da qui ho notato che tramite k=3 si hanno i risultati migliori, dunque ho eseguito k-means con k=3 così da mostrare il cluster ottenuto
+kmenas = KMeans(n_clusters =3, random_state=42)
 kmenas.fit(features) #Addestro il modello
 labels = kmenas.labels_ #Ottengo le labels
 
@@ -70,7 +70,7 @@ plt.figure(figsize=(12, 8))
 scatter = plt.scatter(features[:, 0], features[:, 1], c=labels, cmap='viridis')
 centroids = kmenas.cluster_centers_ #Ottengo i centroidi dei cluster per mostrarli di rosso tramite delle X 
 plt.scatter(centroids[:, 0], centroids[:, 1], s=300, c='red', marker='X', label='Centroids')
-plt.title('K-means (k=4)')
+plt.title('K-means (k=3)')
 plt.xlabel('Component 1 PCA')#Rappresenta quanto il valore di ogni punto della componente 1 di PCA si discosta dalla media dei valori
 plt.ylabel('Component 2 PCA')
 plt.legend()

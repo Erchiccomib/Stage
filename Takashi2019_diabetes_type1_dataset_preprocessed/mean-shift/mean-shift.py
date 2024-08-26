@@ -1,42 +1,34 @@
 from sklearn.cluster import MeanShift
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
-from sklearn.preprocessing import MinMaxScaler, LabelEncoder
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import seaborn as sns
 
-dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\10_7717_peerj_5665_dataYM2018_neuroblastoma.csv')
+dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\Takashi2019_diabetes_type1_dataset_preprocessed.csv')
 
 dataset = dataset.dropna()
 
-features_ = dataset.drop(columns=['outcome', 'time_months'])
-
-encoder = LabelEncoder()
-
-for column in features_.select_dtypes(include=['object']).columns:
-    features_[column] = encoder.fit_transform(features_[column])
-
-
 scaler = MinMaxScaler()
-features_scaled = scaler.fit_transform(features_)
+features_scaled = scaler.fit_transform(dataset)
 
-pca = PCA(n_components=2)
+pca = PCA()
 features = pca.fit_transform(features_scaled)
 
-mean = MeanShift(bandwidth=1)
+mean = MeanShift(bandwidth=1.35)
 mean.fit(features)
 
 labels = mean.labels_
-features_['Cluster'] = labels
+dataset['Cluster'] = labels
 
 plt.figure(figsize=(12,8))
 plt.scatter(features[:,0], features[:,1], c=labels, cmap='viridis')
 plt.xlabel("Component 1 PCA")
 plt.ylabel("Component 2 PCA")
 plt.grid(True)
-plt.title("Mean-Shift Clustering")
+plt.title("Mean-Shift")
 plt.show()
 
 punteggio_silhouette = silhouette_score(features, labels)
@@ -48,7 +40,7 @@ print(f'Punteggio Calinski: {punteggio_calinski}')
 punteggio_davies = davies_bouldin_score(features, labels)
 print(f'Punteggio Davies: {punteggio_davies}')
 
-heatMap = features_.groupby(['Cluster']).mean()
+heatMap = dataset.groupby(['Cluster']).mean()
 
 plt.figure(figsize=(12,8))
 sns.heatmap(heatMap.T, annot=True, cmap='viridis')
@@ -56,3 +48,5 @@ plt.xlabel("Cluster")
 plt.ylabel("Features")
 plt.title("HeatMap")
 plt.show()
+
+

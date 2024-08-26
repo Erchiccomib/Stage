@@ -1,22 +1,22 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 import seaborn as sns
+import numpy as np
 
 ##Leggo il dataset dal file csv
-dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0148699_S1_Text_Sepsis_SIRS_EDITED.csv')
+dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0158570_S2File_depression_heart_failure.csv')
 dataset = dataset.dropna()
 
-print(dataset.info()) ## Da qui noto tutte le informazioni dei dati, sopratutto il tipo di dato presente così da capire se pre-elaborare i dati
+print(dataset.info()) # Si nota che tutti i dati sono numerici dunque non richiedono nessuna conversione
 
-#Ho notato che sono tutti di tipo float64 e int64 quindi vanno bene per l'elaborazione tramite k-means
+features_ = dataset.drop(columns=['id']) #Elimino la colonna 'id' perchè non interessa nel clustering
 
-scalar = MinMaxScaler() #Utilizzo MinMaxScaler per normalizzare i dati
-scalar_feauter = scalar.fit_transform(dataset) #Normalizzo i dati
+scalar = StandardScaler() #Utilizzo StandardScaler per normalizzare i dati
+scalar_feauter = scalar.fit_transform(features_) #Normalizzo i dati
 
 pca = PCA(n_components=2) #Setto PCA per ridurre la dimensionalità dei dati così da ottenere una migliora rappresentazione, setto n_components=2 per indicare le componenti da mantenere dopo la riduzione
 features = pca.fit_transform(scalar_feauter) #trasformo la dimensione dei dati
@@ -46,12 +46,12 @@ plt.title('Gomito')
 plt.grid(True)
 plt.show()
 
-#Da qui ho notato che tramite k=4 si hanno i risultati migliori, dunque ho eseguito k-means con k=4 così da mostrare il cluster ottenuto
-kmenas = KMeans(n_clusters =4, random_state=42)
+#Da qui ho notato che tramite k=3 si hanno i risultati migliori, dunque ho eseguito k-means con k=3 così da mostrare il cluster ottenuto
+kmenas = KMeans(n_clusters =3, random_state=42)
 kmenas.fit(features) #Addestro il modello
 labels = kmenas.labels_ #Ottengo le labels
 
-dataset['Cluster'] = labels #Creo una nuova colonna 'Cluster' in cui indico a quale cluster è stato associato ogni elemento
+features_['Cluster'] = labels #Creo una nuova colonna 'Cluster' in cui indico a quale cluster è stato associato ogni elemento
 
 #Calcolo e stampo a video il valore delle metriche di valutazione
 score_silhouette = silhouette_score(features, labels)
@@ -70,7 +70,7 @@ plt.figure(figsize=(12, 8))
 scatter = plt.scatter(features[:, 0], features[:, 1], c=labels, cmap='viridis')
 centroids = kmenas.cluster_centers_ #Ottengo i centroidi dei cluster per mostrarli di rosso tramite delle X 
 plt.scatter(centroids[:, 0], centroids[:, 1], s=300, c='red', marker='X', label='Centroids')
-plt.title('K-means (k=4)')
+plt.title('K-means (k=3)')
 plt.xlabel('Component 1 PCA')#Rappresenta quanto il valore di ogni punto della componente 1 di PCA si discosta dalla media dei valori
 plt.ylabel('Component 2 PCA')
 plt.legend()
@@ -81,7 +81,7 @@ plt.show()
 #Quindi nello specifico PCA assegna delle nuove coordinate ad ogni punto e tramite plot si mostra il discostamento del valore assegnato al punto dato rispetto alla media dei valori
 
 #Calcolo delle statistiche descrittive per ciascun cluster così da comprendere la differenza presente tra i cluster
-cluster_summary = dataset.groupby('Cluster').mean()
+cluster_summary = features_.groupby('Cluster').mean()
 
 # Heatmap delle medie delle caratteristiche nei diversi cluster
 plt.figure(figsize=(12, 8))
@@ -89,4 +89,5 @@ sns.heatmap(cluster_summary.T, annot=True, cmap='viridis')
 plt.title('Heatmap')
 plt.xlabel('Cluster')
 plt.ylabel('Feature')
+plt.subplots_adjust(left=0.3, right=0.8)
 plt.show()

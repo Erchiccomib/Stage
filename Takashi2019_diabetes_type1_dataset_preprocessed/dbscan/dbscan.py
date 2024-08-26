@@ -8,7 +8,7 @@ from sklearn.decomposition import PCA
 import seaborn as sns
 
 #Leggo il dataset
-dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0148699_S1_Text_Sepsis_SIRS_EDITED.csv')
+dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\Takashi2019_diabetes_type1_dataset_preprocessed.csv')
 
 dataset = dataset.dropna()
 #Normalizzo i valori tramite MinMaxScaler
@@ -20,7 +20,7 @@ pca = PCA(n_components=2)
 features = pca.fit_transform(features_scaled)
 
 #Eseguo l'algoritmo DBSCAN
-dbscan = DBSCAN(eps=0.5, min_samples=5) #Ho provato, utilizzando la normalizzazione tramite MinMaxScaler, diversi epsilon ma non cambia il punteggio delle metriche
+dbscan = DBSCAN(eps=0.3) #Ho provato diverse configurazioni ottenendo un miglior riscontro con eps=0.3
 dbscan.fit(features)
 
 labels = dbscan.labels_

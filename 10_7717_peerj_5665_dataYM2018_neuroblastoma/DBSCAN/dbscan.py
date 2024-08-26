@@ -24,7 +24,7 @@ features_scaled = scaler.fit_transform(features_)
 pca = PCA(n_components=2)
 features = pca.fit_transform(features_scaled)
 
-dbscan = DBSCAN(eps=0.5) #Ho provato diverse configurazioni non ottenendo nessuna miglioria
+dbscan = DBSCAN(eps=0.5) 
 dbscan.fit(features)
 
 labels = dbscan.labels_

@@ -1,5 +1,5 @@
 from sklearn.cluster import Birch
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from sklearn.decomposition import PCA
 import pandas as pd
@@ -7,29 +7,32 @@ import matplotlib.pyplot as plot
 import seaborn as sns
 
 #Leggo il dataset
-dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0148699_S1_Text_Sepsis_SIRS_EDITED.csv')
+dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0158570_S2File_depression_heart_failure.csv')
 
 #Elimino le righe in cui mancano valori
 dataset = dataset.dropna()
 
+
 #Noto che tutte le colonne sono numeriche quindi non ho bisogno di conversioni
 print(dataset.info())
 
+features_ = dataset.drop(columns=['id'])
+
 #Normalizzo i valori
-scaler = MinMaxScaler()
-features_scaled = scaler.fit_transform(dataset)
+scaler = StandardScaler()
+features_scaled = scaler.fit_transform(features_)
 
 #Setto PCA per ridurre la dimensionalità dei dati così da ottenere una migliora rappresentazione, setto n_components=2 per indicare le componenti da mantenere dopo la riduzione
 pca = PCA(n_components=2)
 features = pca.fit_transform(features_scaled)
 
 #Eseguo Birch
-birch = Birch(threshold=0.3, n_clusters=100) #Ho provato diversi valori per branching_factor ma non cambia nulla, mentre per threshold ho notato che impostandolo a 0.3 si ha un miglior clustering
+birch = Birch(threshold=1.4, n_clusters=None) #Ho provato diversi valori per branching_factor ma non cambia nulla, mentre per threshold ho notato che impostandolo a 1.4 si ha un miglior clustering
 birch.fit(features)
 
 labels = birch.labels_
 
-dataset['Cluster'] = labels
+features_['Cluster'] = labels
 
 #Mostro i cluster ottenuti
 plot.figure(figsize=(12,8))
@@ -51,11 +54,12 @@ punteggio_davies = davies_bouldin_score(features, labels)
 print(f'Punteggio Davies: {punteggio_davies}')
 
 #Mostro l'heatMap
-heatMap = dataset.groupby(['Cluster']).mean()
+heatMap = features_.groupby(['Cluster']).mean()
 
-plot.figure(figsize=(30,10))
+plot.figure(figsize=(12,8))
 sns.heatmap(heatMap.T, annot=True, cmap='viridis')
 plot.xlabel("Cluster")
 plot.ylabel("Features")
 plot.title("HeatMap")
+plot.subplots_adjust(left=0.3, right=0.8)
 plot.show()

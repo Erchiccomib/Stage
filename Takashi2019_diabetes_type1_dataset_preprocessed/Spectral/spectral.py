@@ -1,25 +1,18 @@
 from sklearn.cluster import SpectralClustering
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score, pairwise_distances_argmin_min
-from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 
-dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\10_7717_peerj_5665_dataYM2018_neuroblastoma.csv')
+dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\Takashi2019_diabetes_type1_dataset_preprocessed.csv')
 
 dataset = dataset.dropna()
 
-encoder = LabelEncoder()
-
-features_ = dataset.drop(columns=['outcome','time_months'])
-
-for column in features_.select_dtypes(include=['object']).columns:
-    features_[column] = encoder.fit_transform(features_[column])
-
-scaler = MinMaxScaler()
-features_scaled = scaler.fit_transform(features_)
+scaler = StandardScaler()
+features_scaled = scaler.fit_transform(dataset)
 
 pca = PCA(n_components=2)
 features = pca.fit_transform(features_scaled)
@@ -43,15 +36,15 @@ plt.figure(figsize=(10, 6))
 plt.plot(K, inertia, marker='o')
 plt.xlabel('Numero di Cluster')
 plt.ylabel('Inerzia')
-plt.title('Gomito')
+plt.title('Metodo del Gomito per Determinare il Numero Ottimale di Cluster')
 plt.grid(True)
 plt.show()
 
-spectral = SpectralClustering(n_clusters=3, affinity='rbf', gamma=20, random_state=42)
+spectral = SpectralClustering(n_clusters=3, affinity='rbf',random_state=42, gamma=30)#Ho provato diverse configurazioni ottenendo lo stesso risultato sia con affinity posto su rbf che su nearest_neighbors
 spectral.fit(features)
 
 labels = spectral.labels_
-features_['Cluster'] = labels
+dataset['Cluster'] = labels
 
 plt.figure(figsize=(12,8))
 plt.scatter(features[:,0], features[:,1], c=labels, cmap='viridis')
@@ -70,7 +63,7 @@ print(f'Punteggio Calinski: {punteggio_calinski}')
 punteggio_davies = davies_bouldin_score(features, labels)
 print(f'Punteggio Davies: {punteggio_davies}')
 
-heatMap = features_.groupby(['Cluster']).mean()
+heatMap = dataset.groupby(['Cluster']).mean()
 
 plt.figure(figsize=(12,8))
 sns.heatmap(heatMap.T, annot=True, cmap='viridis')

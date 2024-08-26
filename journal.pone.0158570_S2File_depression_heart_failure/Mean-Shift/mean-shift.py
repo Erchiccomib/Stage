@@ -1,31 +1,25 @@
 from sklearn.cluster import MeanShift
 from sklearn.decomposition import PCA
-from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
-from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score, pairwise_distances_argmin_min
+from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 
-dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\10_7717_peerj_5665_dataYM2018_neuroblastoma.csv')
+dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0158570_S2File_depression_heart_failure.csv')
 
 dataset = dataset.dropna()
 
-features_ = dataset.drop(columns=['outcome', 'time_months'])
+features_ = dataset.drop(columns=['id'])
 
-encoder = LabelEncoder()
-
-for column in features_.select_dtypes(include=['object']).columns:
-    features_[column] = encoder.fit_transform(features_[column])
-
-
-scaler = MinMaxScaler()
+scaler = StandardScaler()
 features_scaled = scaler.fit_transform(features_)
 
 pca = PCA(n_components=2)
 features = pca.fit_transform(features_scaled)
 
-mean = MeanShift(bandwidth=1)
+mean = MeanShift(bandwidth=1.5, bin_seeding=True)
 mean.fit(features)
 
 labels = mean.labels_
@@ -55,4 +49,5 @@ sns.heatmap(heatMap.T, annot=True, cmap='viridis')
 plt.xlabel("Cluster")
 plt.ylabel("Features")
 plt.title("HeatMap")
+plt.subplots_adjust(left=0.3, right=0.8)
 plt.show()

@@ -7,14 +7,15 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import time
 
-dataset_path = 'C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\10_7717_peerj_5665_dataYM2018_neuroblastoma.csv'
+dataset_path = 'C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0175818_S1Dataset_Spain_cardiac_arrest_EDITED..csv'
 dataset = pd.read_csv(dataset_path)
 dataset = dataset.dropna()
-algorithm = 'k-means'
+algorithm = 'agglomerative'
 
 scaler = MinMaxScaler()#Utilizzo MinMaxScaler per normalizzare i dati
-
+    
 if '10_7717_peerj_5665_dataYM2018_neuroblastoma' in dataset_path:
     features_ = dataset.drop(columns=['time_months', 'outcome'])#Escludo outcome perchè pongo il clustering sui valori di base dunque su nessun valore 'finale', mentre per time_months ho deciso di escluderlo perchè non è facilmente interpretabile e ha una distribuzione troppo elevata
     #Inizializzo l'encoder per trasformare le colonne categoriali
@@ -101,7 +102,7 @@ elif 'journal.pone.0148699_S1_Text_Sepsis_SIRS_EDITED' in dataset_path:
     elif 'dbscan' in algorithm:
         e = 0.5 #Indica eps
     elif 'agglomerative' in algorithm:
-        clusters=3 #Indica il numero di cluster
+        clusters=4 #Indica il numero di cluster
         link = 'ward' #Indica linkage
         aff = 'euclidean'
     elif 'spectral' in algorithm:
@@ -124,7 +125,7 @@ elif 'Takashi2019_diabetes_type1_dataset_preprocessed' in dataset_path:
     elif 'dbscan' in algorithm:
         e = 0.3 #Indica eps
     elif 'agglomerative' in algorithm:
-        clusters=4 #Indica il numero di cluster
+        clusters=3 #Indica il numero di cluster
         link = 'ward' #Indica linkage
         aff = 'euclidean'
     elif 'spectral' in algorithm:
@@ -138,10 +139,14 @@ elif 'Takashi2019_diabetes_type1_dataset_preprocessed' in dataset_path:
 
 scaler_feauter = scaler.fit_transform(features_) #Normalizzo i dati
 
-pca = PCA(n_components=2) #Setto PCA per ridurre la dimensionalità dei dati così da ottenere una migliora rappresentazione, setto n_components=2 per indicare le componenti da mantenere dopo la riduzione
+if(dataset_path == "C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\Takashi2019_diabetes_type1_dataset_preprocessed.csv" and algorithm=="mean-shift"):
+    pca = PCA() #Non imposto n_comonents poichè l'algortimo richiede la struttura originale dei dati per funzionare correttamente 
+else:
+    pca = PCA(n_components=2) #Setto PCA per ridurre la dimensionalità dei dati così da ottenere una migliora rappresentazione, setto n_components=2 per indicare le componenti da mantenere dopo la riduzione
 features = pca.fit_transform(scaler_feauter) #trasformo la dimensione dei dati
     
 if 'k-means' in algorithm:
+    start_time = time.time()
     K= range(2,10) #Setto il range di cluster da formare tramite k-means
 
     #Utilizzo la tecnica del gomito per comprendere quanti cluster formare
@@ -151,6 +156,29 @@ if 'k-means' in algorithm:
         kmeans.fit(features)
         inertia.append(kmeans.inertia_)
         labelss = kmeans.labels_
+
+
+    kmenas = KMeans(n_clusters=clusters, random_state=42 )
+    kmenas.fit(features) #Addestro il modello
+    labels = kmenas.labels_ #Ottengo le labels
+
+    end_time = time.time()
+    
+    features_['Cluster'] = labels #Creo una nuova colonna 'Cluster' in cui indico a quale cluster è stato associato ogni elemento
+
+    # Conto il numero di outlier presenti nel clustering
+    centroids = kmeans.cluster_centers_ #Ottengo i centroidi
+
+    closest,distanze = pairwise_distances_argmin_min(features, centroids) #Calcolo la distanza e le salvo nell'array distanze. Inoltre, closest è l'array che contiene il centroide più vicino per un determinato punto
+
+    soglia = np.percentile(distanze, 95) #Uso il 95-esimo quartile delle distanze come soglia
+
+    outliers = np.where(distanze > soglia)[0] #Ottengo dalla tupla solo le distanze che sono maggiori della soglia
+
+    outliers_number = len(outliers) #Conto il numero di errori
+
+    #Stampo il numero di outlier
+    print(f"Numero di outlier: {outliers_number}")
     #Rappresento a video la curvatura dell'inerzia per ogni k testato su k-means
     plt.figure(figsize=(10,6))
     plt.plot(K, inertia, 'bx-')
@@ -160,16 +188,11 @@ if 'k-means' in algorithm:
     plt.grid(True)
     plt.show()
 
-    kmenas = KMeans(n_clusters=clusters, random_state=42 )
-    kmenas.fit(features) #Addestro il modello
-    labels = kmenas.labels_ #Ottengo le labels
-
-    features_['Cluster'] = labels #Creo una nuova colonna 'Cluster' in cui indico a quale cluster è stato associato ogni elemento
-
     #Mostro il cluster ottenuto
     plt.figure(figsize=(12, 8))
     scatter = plt.scatter(features[:, 0], features[:, 1], c=labels, cmap='viridis')
     centroids = kmenas.cluster_centers_ #Ottengo i centroidi dei cluster per mostrarli di rosso tramite delle X 
+   
     plt.scatter(centroids[:, 0], centroids[:, 1], s=300, c='red', marker='X', label='Centroids')
     plt.title('K-means (k=3)')
     plt.xlabel('Component 1 PCA')#Rappresenta quanto il valore di ogni punto della componente 1 di PCA si discosta dalla media dei valori
@@ -180,11 +203,12 @@ if 'k-means' in algorithm:
     plt.show()
 
 elif 'spectral' in algorithm:
+    start_time = time.time()
     inertia=[]
     K=range(2,10)
 
     for k in K:
-        spectral = SpectralClustering(n_clusters=k, affinity=aff, random_state=42, gamma = gam, n_neighbors= neighbors)
+        spectral = SpectralClustering(n_clusters=k, affinity=aff, random_state=42)
         spectral.fit(features)
         labels = spectral.labels_
         centroids = np.array([features[labels == i].mean(axis=0) for i in range(k)])
@@ -194,6 +218,28 @@ elif 'spectral' in algorithm:
         inertia_ = np.sum(distances ** 2)
         inertia.append(inertia_)
 
+    spectral = SpectralClustering(n_clusters=clusters, affinity=aff, gamma=gam, random_state=42, n_neighbors= neighbors)
+    spectral.fit(features)
+
+    end_time = time.time()
+
+    labels = spectral.labels_
+    features_['Cluster'] = labels
+
+
+    # Conto il numero di outlier presenti nel clustering
+    centroids = np.array([features[labels == i].mean(axis=0) for i in np.unique(labels)]) #Ottengo i centroidi manualmente tramite la media dei punti presenti in essi
+
+    closest,distanze = pairwise_distances_argmin_min(features, centroids) #Calcolo la distanza e le salvo nell'array distanze. Inoltre, closest è l'array che contiene il centroide più vicino per un determinato punto
+
+    soglia = np.percentile(distanze, 95) #Uso il 95-esimo quartile delle distanze come soglia
+
+    outliers = np.where(distanze > soglia)[0] #Ottengo dalla tupla solo le distanze che sono maggiori della soglia
+
+    outliers_number = len(outliers) #Conto il numero di errori
+
+    #Stampo il numero di outlier
+    print(f"Numero di outlier: {outliers_number}")
     #Rappresento a video la curvatura dell'inerzia per ogni k testato su spectral
     plt.figure(figsize=(10,6))
     plt.plot(K, inertia, 'bx-')
@@ -203,12 +249,7 @@ elif 'spectral' in algorithm:
     plt.grid(True)
     plt.show()
 
-    spectral = SpectralClustering(n_clusters=clusters, affinity=aff, gamma=gam, random_state=42, n_neighbors= neighbors)
-    spectral.fit(features)
-
-    labels = spectral.labels_
-    features_['Cluster'] = labels
-
+    #Rappresento a video i cluster ottenuti
     plt.figure(figsize=(12,8))
     plt.scatter(features[:,0], features[:,1], c=labels, cmap='viridis')
     plt.xlabel("Component 1 PCA")
@@ -218,12 +259,28 @@ elif 'spectral' in algorithm:
     plt.show()
 
 elif 'birch' in algorithm:
+    start_time = time.time()
     birch = Birch(threshold=t, n_clusters=clusters) #Ho provato diversi valori per branching_factor ma non cambia nulla, mentre per threshold ho notato che impostandolo a 0.2 si ha un miglior clustering. Inoltre ho settato n_cluster=3 (default) poichè settato a None vengono generati 18 cluster
     birch.fit(features)
 
+    end_time=time.time()
+    
     labels = birch.labels_
-
     features_['Cluster'] = labels
+
+    # Conto il numero di outlier presenti nel clustering
+    centroids = birch.subcluster_centers_ #Ottengo i centroidi
+
+    closest,distanze = pairwise_distances_argmin_min(features, centroids) #Calcolo la distanza e le salvo nell'array distanze. Inoltre, closest è l'array che contiene il centroide più vicino per un determinato punto
+
+    soglia = np.percentile(distanze, 95) #Uso il 95-esimo quartile delle distanze come soglia
+
+    outliers = np.where(distanze > soglia)[0] #Ottengo dalla tupla solo le distanze che sono maggiori della soglia
+
+    outliers_number = len(outliers) #Conto il numero di errori
+
+    #Stampo il numero di outlier
+    print(f"Numero di outlier: {outliers_number}")
 
     plt.figure(figsize=(12,8))
     plt.scatter(features[:,0], features[:,1], c=labels, cmap='viridis')
@@ -234,12 +291,18 @@ elif 'birch' in algorithm:
     plt.show()
 
 elif 'dbscan' in algorithm:
+    start_time = time.time()
     dbscan = DBSCAN(eps=e) 
     dbscan.fit(features)
 
+    end_time = time.time()
+   
     labels = dbscan.labels_
 
+    num = np.sum(labels==-1)
     features_['Cluster'] = labels
+
+    print(f"Numero errori:{num}")
 
     plt.figure(figsize=(12, 8))
     scatter = plt.scatter(features[:, 0], features[:, 1], c=labels, cmap='viridis', s=50, alpha=0.6)
@@ -251,8 +314,35 @@ elif 'dbscan' in algorithm:
     plt.show()
 
 elif 'agglomerative' in algorithm:
+    start_time = time.time()
+
     #specifico il criterio utilizzato per unire i cluster durante il processo di clustering gerarchico e salvo il collegamento in Z
     Z = linkage(features, link)
+
+    #Eseguo il cluster con k=4
+    agglomerative = AgglomerativeClustering(n_clusters=clusters, linkage=link, affinity=aff)
+    agglomerative.fit(features)
+
+    end_time = time.time()
+
+    labels= agglomerative.labels_
+
+    features_['Cluster'] = labels
+
+    # Conto il numero di outlier presenti nel clustering
+
+    centroids = np.array([features[labels == i].mean(axis=0) for i in np.unique(labels)]) #Calcolo manualmente i centroidi come la media dei punti presenti in esso
+
+    closest,distanze = pairwise_distances_argmin_min(features, centroids) #Calcolo la distanza e le salvo nell'array distanze. Inoltre, closest è l'array che contiene il centroide più vicino per un determinato punto
+
+    soglia = np.percentile(distanze, 95) #Uso il 95-esimo quartile delle distanze come soglia
+
+    outliers = np.where(distanze > soglia)[0] #Ottengo dalla tupla solo le distanze che sono maggiori della soglia
+
+    outliers_number = len(outliers) #Conto il numero di errori
+
+    #Stampo il numero di outlier
+    print(f"Numero di outlier: {outliers_number}")
 
     #Mostro a video il dendrogramma per comprendere il numero di cluster da formare (k=4)
     plt.figure(figsize=(10,7))
@@ -261,14 +351,6 @@ elif 'agglomerative' in algorithm:
     plt.xlabel('Cluster')
     plt.ylabel('Distance')
     plt.show()
-
-    #Eseguo il cluster con k=4
-    agglomerative = AgglomerativeClustering(n_clusters=clusters, linkage=link, affinity=aff)
-    agglomerative.fit(features)
-
-    labels= agglomerative.labels_
-
-    features_['Cluster'] = labels
 
     #Mostro il clustering ottenuto
     plt.figure(figsize=(12,8))
@@ -280,11 +362,29 @@ elif 'agglomerative' in algorithm:
     plt.show()
 
 elif 'mean-shift' in algorithm:
+    start_time = time.time()
+
     mean = MeanShift(bandwidth=band, bin_seeding= seeding)
     mean.fit(features)
 
+    end_time = time.time()
+
     labels = mean.labels_
     features_['Cluster'] = labels
+
+    # Conto il numero di outlier presenti nel clustering
+    centroids = mean.cluster_centers_ #Ottengo i centroidi
+
+    closest,distanze = pairwise_distances_argmin_min(features, centroids) #Calcolo la distanza e le salvo nell'array distanze. Inoltre, closest è l'array che contiene il centroide più vicino per un determinato punto
+
+    soglia = np.quantile(distanze, 95) #Uso il 95-esimo quartile delle distanze come soglia
+
+    outliers = np.where(distanze > 3)[0] #Ottengo dalla tupla solo le distanze che sono maggiori della soglia
+
+    outliers_number = len(outliers) #Conto il numero di errori
+
+    #Stampo il numero di outlier
+    print(f"Numero di outlier: {outliers_number}")
 
     plt.figure(figsize=(12,8))
     plt.scatter(features[:,0], features[:,1], c=labels, cmap='viridis')
@@ -315,3 +415,7 @@ plt.xlabel('Cluster')
 plt.ylabel('Feature')
 plt.subplots_adjust(left=0.3, right=0.8)
 plt.show()
+
+
+total_time = (end_time - start_time) * 1000
+print(f"Tempo impiegato: {total_time} " )

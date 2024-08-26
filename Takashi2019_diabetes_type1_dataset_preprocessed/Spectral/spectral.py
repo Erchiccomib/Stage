@@ -1,7 +1,7 @@
 from sklearn.cluster import SpectralClustering
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score, pairwise_distances_argmin_min
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -11,7 +11,7 @@ dataset = pd.read_csv('C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cli
 
 dataset = dataset.dropna()
 
-scaler = StandardScaler()
+scaler = MinMaxScaler()
 features_scaled = scaler.fit_transform(dataset)
 
 pca = PCA(n_components=2)

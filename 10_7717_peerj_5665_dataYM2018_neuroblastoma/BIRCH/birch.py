@@ -26,7 +26,7 @@ features_scaled = scaler.fit_transform(features_)
 pca = PCA(n_components=2)
 features = pca.fit_transform(features_scaled)
 
-birch = Birch(threshold=0.2, n_clusters=3) #Ho provato diversi valori per branching_factor ma non cambia nulla, mentre per threshold ho notato che impostandolo a 0.2 si ha un miglior clustering. Inoltre ho settato n_cluster=3 (default) poichè settato a None vengono generati 18 cluster
+birch = Birch(threshold=0.2) #Ho provato diversi valori per branching_factor ma non cambia nulla, mentre per threshold ho notato che impostandolo a 0.2 si ha un miglior clustering. Inoltre ho settato n_cluster=3 (default) poichè settato a None vengono generati 18 cluster
 birch.fit(features)
 
 labels = birch.labels_

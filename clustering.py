@@ -9,10 +9,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import time
 
-dataset_path = 'C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0175818_S1Dataset_Spain_cardiac_arrest_EDITED..csv'
+dataset_path = 'C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0148699_S1_Text_Sepsis_SIRS_EDITED.csv'
 dataset = pd.read_csv(dataset_path)
 dataset = dataset.dropna()
-algorithm = 'agglomerative'
+algorithm = 'mean-shift'
 
 scaler = MinMaxScaler()#Utilizzo MinMaxScaler per normalizzare i dati
     
@@ -112,7 +112,7 @@ elif 'journal.pone.0148699_S1_Text_Sepsis_SIRS_EDITED' in dataset_path:
         neighbors = 0
     elif 'mean-shift' in algorithm:
         band = None  #Indica bandwidth
-        seeding = True #Indica bin_seeding
+        seeding = False #Indica bin_seeding
 
 elif 'Takashi2019_diabetes_type1_dataset_preprocessed' in dataset_path:
     features_ = dataset
@@ -377,7 +377,7 @@ elif 'mean-shift' in algorithm:
 
     closest,distanze = pairwise_distances_argmin_min(features, centroids) #Calcolo la distanza e le salvo nell'array distanze. Inoltre, closest è l'array che contiene il centroide più vicino per un determinato punto
 
-    soglia = np.quantile(distanze, 95) #Uso il 95-esimo quartile delle distanze come soglia
+    soglia = np.percentile(distanze, 95) #Uso il 95-esimo quartile delle distanze come soglia
 
     outliers = np.where(distanze > 3)[0] #Ottengo dalla tupla solo le distanze che sono maggiori della soglia
 

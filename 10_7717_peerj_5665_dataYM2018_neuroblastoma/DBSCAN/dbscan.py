@@ -13,10 +13,6 @@ dataset = dataset.dropna()
 
 features_ = dataset.drop(columns=['time_months', 'outcome'])
 
-encoder = LabelEncoder()
-for col in features_.select_dtypes(include=['object']).columns:
-    features_[col] = encoder.fit_transform(features_[col])
-
 
 scaler = MinMaxScaler()
 features_scaled = scaler.fit_transform(features_)

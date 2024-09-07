@@ -40,7 +40,7 @@ plt.title('Metodo del Gomito per Determinare il Numero Ottimale di Cluster')
 plt.grid(True)
 plt.show()
 
-spectral = SpectralClustering(n_clusters=4, affinity='nearest_neighbors', n_neighbors=130, random_state=42, gamma=0) #Ho provato sia con rbf che con nearest_neighbors settando rispettivamente sia gamma per rbf che n_neighbors per nearest_neighbors ottenendo un riscontro migliore con nearest_neighbors
+spectral = SpectralClustering(n_clusters=4, affinity='nearest_neighbors', n_neighbors=130, random_state=42, gamma=0, assign_labels="discretize") #Ho provato sia con rbf che con nearest_neighbors settando rispettivamente sia gamma per rbf che n_neighbors per nearest_neighbors ottenendo un riscontro migliore con nearest_neighbors
 spectral.fit(features)
 
 labels = spectral.labels_

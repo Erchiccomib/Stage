@@ -22,7 +22,7 @@ pca = PCA(n_components=2)
 features = pca.fit_transform(features_scaled)
 
 #Eseguo l'algoritmo DBSCAN
-dbscan = DBSCAN(eps=0.7, min_samples=2) #Ho provato, utilizzando la normalizzazione tramite MinMaxScaler, diversi epsilon ma non cambia il punteggio delle metriche
+dbscan = DBSCAN(eps=0.9, min_samples=100) #Ho provato, utilizzando la normalizzazione tramite MinMaxScaler, diversi epsilon ma non cambia il punteggio delle metriche
 dbscan.fit(features)
 
 labels = dbscan.labels_

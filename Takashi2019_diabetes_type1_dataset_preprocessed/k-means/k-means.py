@@ -73,8 +73,6 @@ plt.scatter(centroids[:, 0], centroids[:, 1], s=300, c='red', marker='X', label=
 plt.title('K-means (k=3)')
 plt.xlabel('Component 1 PCA')#Rappresenta quanto il valore di ogni punto della componente 1 di PCA si discosta dalla media dei valori
 plt.ylabel('Component 2 PCA')
-plt.legend()
-plt.colorbar(scatter, label='Cluster Label')
 plt.grid(True)
 plt.show()
 

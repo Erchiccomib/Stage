@@ -3,19 +3,16 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, LabelEncoder
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score, pairwise_distances_argmin_min
 from scipy.cluster.hierarchy import dendrogram, linkage
-import sklearn
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-import time, sys
+import time
 
-print(sys.version)
-
-dataset_path = 'C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\Takashi2019_diabetes_type1_dataset_preprocessed.csv'
+dataset_path = 'C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0148699_S1_Text_Sepsis_SIRS_EDITED.csv'
 dataset = pd.read_csv(dataset_path)
 dataset = dataset.dropna()
-algorithm = 'k-means'
+algorithm = 'mean-shift'
 
 scaler = MinMaxScaler()#Utilizzo MinMaxScaler per normalizzare i dati
     
@@ -57,7 +54,7 @@ elif 'journal.pone.0158570_S2File_depression_heart_failure' in dataset_path:
         clusters=None #Indica il numero di cluster
         t= 1.4 #Indica il threshold
     elif 'dbscan' in algorithm:
-        e = 0.9 #Indica eps 0.9
+        e = 0.9 #Indica eps
     elif 'agglomerative' in algorithm:
         clusters=3 #Indica il numero di cluster
         link = 'ward' #Indica linkage
@@ -186,8 +183,8 @@ if 'k-means' in algorithm:
     plt.figure(figsize=(10,6))
     plt.plot(K, inertia, 'bx-')
     plt.xlabel('Numeri di cluster')
-    plt.ylabel('Inerzia')
-    plt.title('Metodo del Gomito')
+    plt.ylabel('Inertia')
+    plt.title('Tecnica del Gomito')
     plt.grid(True)
     plt.show()
 

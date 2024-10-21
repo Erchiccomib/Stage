@@ -9,17 +9,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import time
 
-<<<<<<< HEAD
 dataset_path = 'C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0175818_S1Dataset_Spain_cardiac_arrest_EDITED..csv'
 dataset = pd.read_csv(dataset_path)
 dataset = dataset.dropna()
 algorithm = 'agglomerative'
-=======
-dataset_path = 'C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0148699_S1_Text_Sepsis_SIRS_EDITED.csv'
-dataset = pd.read_csv(dataset_path)
-dataset = dataset.dropna()
-algorithm = 'mean-shift'
->>>>>>> 1cf1f3d2dbb1acd0f09db138989c302afd47cb17
 
 scaler = MinMaxScaler()#Utilizzo MinMaxScaler per normalizzare i dati
     

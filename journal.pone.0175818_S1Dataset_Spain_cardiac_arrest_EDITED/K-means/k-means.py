@@ -78,15 +78,19 @@ plt.colorbar(scatter, label='Cluster Label')
 plt.grid(True)
 plt.show()
 
-#Quindi nello specifico PCA assegna delle nuove coordinate ad ogni punto e tramite plot si mostra il discostamento del valore assegnato al punto dato rispetto alla media dei valori
+#Stampo a video l'heatMap 
+features_only = dataset.drop(columns=['Cluster'], errors='ignore') #Escludo la colonna Cluster
 
-#Calcolo delle statistiche descrittive per ciascun cluster così da comprendere la differenza presente tra i cluster
-cluster_summary = dataset.groupby('Cluster').mean()
+# Converto 'scaler_feauter' in un DataFrame Pandas con i nomi delle colonne originali
+features_df = pd.DataFrame(scalar_feauter, columns=features_only.columns)
 
-# Heatmap delle medie delle caratteristiche nei diversi cluster
-plt.figure(figsize=(12, 8))
+features_df['Cluster'] = dataset['Cluster'].values
+
+cluster_summary = features_df.groupby('Cluster').mean()
+
+plt.figure(figsize=(12,8))
 sns.heatmap(cluster_summary.T, annot=True, cmap='viridis')
-plt.title('Heatmap')
-plt.xlabel('Cluster')
-plt.ylabel('Feature')
+plt.xlabel("Cluster")
+plt.ylabel("Features")
+plt.title("HeatMap")
 plt.show()

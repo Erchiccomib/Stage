@@ -24,7 +24,7 @@ pca = PCA(n_components=2)
 features = pca.fit_transform(features_scaled)
 
 #Eseguo Birch
-birch = Birch(threshold=0.3, n_clusters=100) #Ho provato diversi valori per branching_factor ma non cambia nulla, mentre per threshold ho notato che impostandolo a 0.3 si ha un miglior clustering
+birch = Birch(threshold=0.3, n_clusters=None) #Ho provato diversi valori per branching_factor ma non cambia nulla, mentre per threshold ho notato che impostandolo a 0.3 si ha un miglior clustering
 birch.fit(features)
 
 labels = birch.labels_
@@ -50,11 +50,18 @@ print(f'Punteggio Calinski: {punteggio_calinski}')
 punteggio_davies = davies_bouldin_score(features, labels)
 print(f'Punteggio Davies: {punteggio_davies}')
 
-#Mostro l'heatMap
-heatMap = dataset.groupby(['Cluster']).mean()
+#Stampo a video l'heatMap 
+features_only = dataset.drop(columns=['Cluster'], errors='ignore') #Escludo la colonna Cluster
 
-plot.figure(figsize=(30,10))
-sns.heatmap(heatMap.T, annot=True, cmap='viridis')
+# Converto 'features_scaled' in un DataFrame Pandas con i nomi delle colonne originali
+features_df = pd.DataFrame(features_scaled, columns=features_only.columns)
+
+features_df['Cluster'] = dataset['Cluster'].values
+
+cluster_summary = features_df.groupby('Cluster').mean()
+
+plot.figure(figsize=(12,8))
+sns.heatmap(cluster_summary.T, annot=True, cmap='viridis')
 plot.xlabel("Cluster")
 plot.ylabel("Features")
 plot.title("HeatMap")

@@ -40,7 +40,7 @@ plt.title('Metodo del Gomito per Determinare il Numero Ottimale di Cluster')
 plt.grid(True)
 plt.show()
 
-spectral = SpectralClustering(n_clusters=4, affinity='nearest_neighbors', n_neighbors=130, random_state=42, gamma=0, assign_labels="discretize") #Ho provato sia con rbf che con nearest_neighbors settando rispettivamente sia gamma per rbf che n_neighbors per nearest_neighbors ottenendo un riscontro migliore con nearest_neighbors
+spectral = SpectralClustering(n_clusters=4, affinity='nearest_neighbors', n_neighbors=130, random_state=42, gamma=0) #Ho provato sia con rbf che con nearest_neighbors settando rispettivamente sia gamma per rbf che n_neighbors per nearest_neighbors ottenendo un riscontro migliore con nearest_neighbors
 spectral.fit(features)
 
 labels = spectral.labels_
@@ -63,10 +63,18 @@ print(f'Punteggio Calinski: {punteggio_calinski}')
 punteggio_davies = davies_bouldin_score(features, labels)
 print(f'Punteggio Davies: {punteggio_davies}')
 
-heatMap = dataset.groupby(['Cluster']).mean()
+#Stampo a video l'heatMap 
+features_only = dataset.drop(columns=['Cluster'], errors='ignore') #Escludo la colonna Cluster
+
+# Converto 'features_scaled' in un DataFrame Pandas con i nomi delle colonne originali
+features_df = pd.DataFrame(features_scaled, columns=features_only.columns)
+
+features_df['Cluster'] = dataset['Cluster'].values
+
+cluster_summary = features_df.groupby('Cluster').mean()
 
 plt.figure(figsize=(12,8))
-sns.heatmap(heatMap.T, annot=True, cmap='viridis')
+sns.heatmap(cluster_summary.T, annot=True, cmap='viridis')
 plt.xlabel("Cluster")
 plt.ylabel("Features")
 plt.title("HeatMap")

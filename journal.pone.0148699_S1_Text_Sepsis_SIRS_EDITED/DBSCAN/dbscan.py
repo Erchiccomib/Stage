@@ -47,13 +47,19 @@ plt.colorbar(scatter, label='Cluster Label')
 plt.grid(True)
 plt.show()
 
-#Visualizzazione HeatMap
+#Stampo a video l'heatMap 
+features_only = dataset.drop(columns=['Cluster'], errors='ignore') #Escludo la colonna Cluster
 
-heatMap = dataset.groupby('Cluster').mean()
+# Converto 'features_scaled' in un DataFrame Pandas con i nomi delle colonne originali
+features_df = pd.DataFrame(features_scaled, columns=features_only.columns)
+
+features_df['Cluster'] = dataset['Cluster'].values
+
+cluster_summary = features_df.groupby('Cluster').mean()
 
 plt.figure(figsize=(12,8))
-sns.heatmap(heatMap.T, annot=True, cmap='viridis')
-plt.title('Heatmap')
-plt.xlabel('Cluster')
-plt.ylabel('Feature')
+sns.heatmap(cluster_summary.T, annot=True, cmap='viridis')
+plt.xlabel("Cluster")
+plt.ylabel("Features")
+plt.title("HeatMap")
 plt.show()

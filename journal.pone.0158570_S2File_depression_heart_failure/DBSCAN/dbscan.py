@@ -22,7 +22,7 @@ pca = PCA(n_components=2)
 features = pca.fit_transform(features_scaled)
 
 #Eseguo l'algoritmo DBSCAN
-dbscan = DBSCAN(eps=0.9, min_samples=100) #Ho provato, utilizzando la normalizzazione tramite MinMaxScaler, diversi epsilon ma non cambia il punteggio delle metriche
+dbscan = DBSCAN(eps=0.9, min_samples=2) #Ho provato, utilizzando la normalizzazione tramite MinMaxScaler, diversi epsilon ma non cambia il punteggio delle metriche
 dbscan.fit(features)
 
 labels = dbscan.labels_
@@ -49,13 +49,19 @@ plt.colorbar(scatter, label='Cluster Label')
 plt.grid(True)
 plt.show()
 
-#Visualizzazione HeatMap
+#Stampo a video l'heatMap 
+features_only = features_.drop(columns=['Cluster'], errors='ignore') #Escludo la colonna Cluster
 
-heatMap = features_.groupby('Cluster').mean()
+# Converto 'features_scaled' in un DataFrame Pandas con i nomi delle colonne originali
+features_df = pd.DataFrame(features_scaled, columns=features_only.columns)
+
+features_df['Cluster'] = features_['Cluster'].values
+
+cluster_summary = features_df.groupby('Cluster').mean()
 
 plt.figure(figsize=(12,8))
-sns.heatmap(heatMap.T, annot=True, cmap='viridis')
-plt.title('Heatmap')
-plt.xlabel('Cluster')
-plt.ylabel('Feature')
+sns.heatmap(cluster_summary.T, annot=True, cmap='viridis')
+plt.xlabel("Cluster")
+plt.ylabel("Features")
+plt.title("HeatMap")
 plt.show()

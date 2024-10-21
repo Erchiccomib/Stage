@@ -13,6 +13,10 @@ dataset = dataset.dropna()
 
 features_ = dataset.drop(columns=['time_months', 'outcome'])
 
+encoder = LabelEncoder()
+for col in features_.select_dtypes(include=['object']).columns:
+    features_[col] = encoder.fit_transform(features_[col])
+
 
 scaler = MinMaxScaler()
 features_scaled = scaler.fit_transform(features_)
@@ -47,13 +51,19 @@ plt.colorbar(scatter, label='Cluster Label')
 plt.grid(True)
 plt.show()
 
-#Visualizzazione HeatMap
+#Stampo a video l'heatMap 
+features_only = features_.drop(columns=['Cluster'], errors='ignore') #Escludo la colonna Cluster
 
-heatMap = features_.groupby('Cluster').mean()
+# Converto 'features_scaled' in un DataFrame Pandas con i nomi delle colonne originali
+features_df = pd.DataFrame(features_scaled, columns=features_only.columns)
+
+features_df['Cluster'] = features_['Cluster'].values
+
+cluster_summary = features_df.groupby('Cluster').mean()
 
 plt.figure(figsize=(12,8))
-sns.heatmap(heatMap.T, annot=True, cmap='viridis')
-plt.title('Heatmap (MinMaxScaler)')
-plt.xlabel('Cluster')
-plt.ylabel('Feature')
+sns.heatmap(cluster_summary.T, annot=True, cmap='viridis')
+plt.xlabel("Cluster")
+plt.ylabel("Features")
+plt.title("HeatMap")
 plt.show()

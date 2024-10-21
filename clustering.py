@@ -3,19 +3,16 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, LabelEncoder
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score, pairwise_distances_argmin_min
 from scipy.cluster.hierarchy import dendrogram, linkage
-import sklearn
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-import time, sys
+import time
 
-print(sys.version)
-
-dataset_path = 'C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\Takashi2019_diabetes_type1_dataset_preprocessed.csv'
+dataset_path = 'C:\\Users\\fncba\\OneDrive\Documenti\\Stage\\Cartelle cliniche\\journal.pone.0175818_S1Dataset_Spain_cardiac_arrest_EDITED..csv'
 dataset = pd.read_csv(dataset_path)
 dataset = dataset.dropna()
-algorithm = 'k-means'
+algorithm = 'agglomerative'
 
 scaler = MinMaxScaler()#Utilizzo MinMaxScaler per normalizzare i dati
     
@@ -66,7 +63,7 @@ elif 'journal.pone.0158570_S2File_depression_heart_failure' in dataset_path:
         clusters = 3 #Indica il numero di cluster
         aff = 'nearest_neighbors' #Indica affinity
         gam = 0 #Indica gamma
-        neighbors = 40
+        neighbors = 40 
     elif 'mean-shift' in algorithm:
         band = 1.5 #Indica bandwidth
         seeding = True
@@ -323,7 +320,7 @@ elif 'agglomerative' in algorithm:
     Z = linkage(features, link)
 
     #Eseguo il cluster con k=4
-    agglomerative = AgglomerativeClustering(n_clusters=clusters, linkage=link, affinity=aff)
+    agglomerative = AgglomerativeClustering(n_clusters=clusters, linkage=link, metric=aff)
     agglomerative.fit(features)
 
     end_time = time.time()
@@ -406,9 +403,16 @@ print(f'Punteggio Calinski: {score_calinski} ')
 
 score_davies = davies_bouldin_score(features, labels)
 print(f'Punteggio Davies: {score_davies}')
-    
+
 #Calcolo delle statistiche descrittive per ciascun cluster così da comprendere la differenza presente tra i cluster
-cluster_summary = features_.groupby('Cluster').mean()
+features_only = features_.drop(columns=['Cluster'], errors='ignore') #Escludo la colonna Cluster
+
+# Converto 'scaler_feauter' in un DataFrame Pandas con i nomi delle colonne originali
+features_df = pd.DataFrame(scaler_feauter, columns=features_only.columns)
+
+features_df['Cluster'] = features_['Cluster'].values
+
+cluster_summary = features_df.groupby('Cluster').mean()
 
 # Heatmap delle medie delle caratteristiche nei diversi cluster
 plt.figure(figsize=(12, 8))

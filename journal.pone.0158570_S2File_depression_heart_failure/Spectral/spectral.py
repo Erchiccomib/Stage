@@ -65,12 +65,19 @@ print(f'Punteggio Calinski: {punteggio_calinski}')
 punteggio_davies = davies_bouldin_score(features, labels)
 print(f'Punteggio Davies: {punteggio_davies}')
 
-heatMap = features_.groupby(['Cluster']).mean()
+#Stampo a video l'heatMap 
+features_only = features_.drop(columns=['Cluster'], errors='ignore') #Escludo la colonna Cluster
+
+# Converto 'features_scaled' in un DataFrame Pandas con i nomi delle colonne originali
+features_df = pd.DataFrame(features_scaled, columns=features_only.columns)
+
+features_df['Cluster'] = features_['Cluster'].values
+
+cluster_summary = features_df.groupby('Cluster').mean()
 
 plt.figure(figsize=(12,8))
-sns.heatmap(heatMap.T, annot=True, cmap='viridis')
+sns.heatmap(cluster_summary.T, annot=True, cmap='viridis')
 plt.xlabel("Cluster")
 plt.ylabel("Features")
 plt.title("HeatMap")
-plt.subplots_adjust(left=0.3, right=0.8)
 plt.show()
